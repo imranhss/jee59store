@@ -333,6 +333,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtQuantity">
+              <Events>
+                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtQuantityFocusLost"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel10">
               <Properties>
@@ -341,6 +344,7 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtTotalPrice">
               <Events>
+                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtTotalPriceFocusLost"/>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtTotalPriceActionPerformed"/>
               </Events>
             </Component>
@@ -373,6 +377,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Reset"/>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnProductResetMouseClicked"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>

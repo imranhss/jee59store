@@ -39,14 +39,14 @@ public class ProductView extends javax.swing.JFrame {
             ps.setFloat(3, Float.parseFloat(txtQuantity.getText().trim()));
             ps.setFloat(4, Float.parseFloat(txtTotalPrice.getText().trim()));
             ps.setFloat(5, Float.parseFloat(txtSalesPrice.getText().trim()));
-            
+
             ps.executeUpdate();
-            
+
             ps.close();
             db.getCon().close();
-            
+
             JOptionPane.showMessageDialog(this, "Add Product Successfully");
-            
+            clear();
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Add Product unsuccessfully");
@@ -55,6 +55,27 @@ public class ProductView extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Add Product unsuccessfully");
             Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+    }
+
+    public void getTotalPrice() {
+
+        float unitPrice = Float.parseFloat(txtUnitPrice.getText().trim());
+        float quantity = Float.parseFloat(txtQuantity.getText().trim());
+
+        float totalPrice = unitPrice * quantity;
+
+        txtTotalPrice.setText(totalPrice + "");
+
+    }
+
+    public void clear() {
+        txtId.setText("");
+        txtName.setText("");
+        txtUnitPrice.setText("");
+        txtQuantity.setText("");
+        txtTotalPrice.setText("");
+        txtSalesPrice.setText("");
 
     }
 
@@ -206,8 +227,19 @@ public class ProductView extends javax.swing.JFrame {
 
         jLabel9.setText("Quantity");
 
+        txtQuantity.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtQuantityFocusLost(evt);
+            }
+        });
+
         jLabel10.setText("Total Price");
 
+        txtTotalPrice.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtTotalPriceFocusLost(evt);
+            }
+        });
         txtTotalPrice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtTotalPriceActionPerformed(evt);
@@ -228,6 +260,11 @@ public class ProductView extends javax.swing.JFrame {
         btnProductEdit.setText("Edit");
 
         btnProductReset.setText("Reset");
+        btnProductReset.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnProductResetMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout addLayout = new javax.swing.GroupLayout(add);
         add.setLayout(addLayout);
@@ -414,8 +451,25 @@ public class ProductView extends javax.swing.JFrame {
     private void btnProductAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnProductAddMouseClicked
         // TODO add your handling code here:
         addProduct();
-        
+
     }//GEN-LAST:event_btnProductAddMouseClicked
+
+    private void txtTotalPriceFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtTotalPriceFocusLost
+        // TODO add your handling code here:
+
+
+    }//GEN-LAST:event_txtTotalPriceFocusLost
+
+    private void txtQuantityFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtQuantityFocusLost
+        // TODO add your handling code here:
+        getTotalPrice();
+
+    }//GEN-LAST:event_txtQuantityFocusLost
+
+    private void btnProductResetMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnProductResetMouseClicked
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnProductResetMouseClicked
 
     /**
      * @param args the command line arguments
