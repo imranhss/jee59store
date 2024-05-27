@@ -125,6 +125,69 @@ public class ProductView extends javax.swing.JFrame {
 
     }
 
+    public void deleteProduct() {
+        String sql = "delete from product where id=?";
+        PreparedStatement ps;
+       
+        try {
+            ps=db.getCon().prepareStatement(sql);
+            
+            ps.setInt(1, Integer.parseInt(txtId.getText()));
+            ps.executeUpdate();
+            
+             ps.close();
+            db.getCon();
+            JOptionPane.showMessageDialog(this, "Delete Product Successfully");
+            clear();
+            showProductOnTable();
+            
+        } catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(this, "Delete Product Unsuccessfully");
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Delete Product Unsuccessfully");
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+    
+    
+    public void editProduct(){
+        String sql = "update product set name=?, unitPrice=?, quantity=?, totalPrice=?, salesPrice=? where id=?";
+        PreparedStatement ps;
+        
+        try {
+            ps=db.getCon().prepareStatement(sql);
+            
+            ps.setString(1, txtName.getText().trim());
+            ps.setFloat(2, Float.parseFloat(txtUnitPrice.getText().trim()));
+            ps.setFloat(3, Float.parseFloat(txtQuantity.getText().trim()));
+            ps.setFloat(4, Float.parseFloat(txtTotalPrice.getText().trim()));
+            ps.setFloat(5, Float.parseFloat(txtSalesPrice.getText().trim()));
+            ps.setInt(6, Integer.parseInt(txtId.getText()));
+            
+            ps.executeUpdate();
+            
+            
+             ps.close();
+            db.getCon();
+            JOptionPane.showMessageDialog(this, "Update Product Successfully");
+            clear();
+            showProductOnTable();
+            
+            
+        } catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(this, "Update Product Unsuccessfully");
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+             JOptionPane.showMessageDialog(this, "Update Product Unsuccessfully");
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    
+    
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -306,8 +369,18 @@ public class ProductView extends javax.swing.JFrame {
         });
 
         btnProductDelete.setText("Delete");
+        btnProductDelete.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnProductDeleteMouseClicked(evt);
+            }
+        });
 
         btnProductEdit.setText("Edit");
+        btnProductEdit.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnProductEditMouseClicked(evt);
+            }
+        });
 
         btnProductReset.setText("Reset");
         btnProductReset.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -324,6 +397,11 @@ public class ProductView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblProductView.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblProductViewMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblProductView);
 
         javax.swing.GroupLayout addLayout = new javax.swing.GroupLayout(add);
@@ -402,7 +480,7 @@ public class ProductView extends javax.swing.JFrame {
                 .addGroup(addLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
                     .addComponent(txtSalesPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 90, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -530,6 +608,39 @@ public class ProductView extends javax.swing.JFrame {
         // TODO add your handling code here:
         clear();
     }//GEN-LAST:event_btnProductResetMouseClicked
+
+    private void tblProductViewMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductViewMouseClicked
+        // TODO add your handling code here:
+
+        int rowIndex = tblProductView.getSelectedRow();
+
+        String id = tblProductView.getModel().getValueAt(rowIndex, 0).toString();
+        String name = tblProductView.getModel().getValueAt(rowIndex, 1).toString();
+        String unitPrice = tblProductView.getModel().getValueAt(rowIndex, 2).toString();
+        String quantity = tblProductView.getModel().getValueAt(rowIndex, 3).toString();
+        String totalPrice = tblProductView.getModel().getValueAt(rowIndex, 4).toString();
+        String salesPrice = tblProductView.getModel().getValueAt(rowIndex, 5).toString();
+
+        txtId.setText(id);
+        txtName.setText(name);
+        txtUnitPrice.setText(unitPrice);
+        txtQuantity.setText(quantity);
+        txtTotalPrice.setText(totalPrice);
+        txtSalesPrice.setText(salesPrice);
+
+    }//GEN-LAST:event_tblProductViewMouseClicked
+
+    private void btnProductDeleteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnProductDeleteMouseClicked
+        // TODO add your handling code here:
+
+        deleteProduct();
+    }//GEN-LAST:event_btnProductDeleteMouseClicked
+
+    private void btnProductEditMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnProductEditMouseClicked
+        // TODO add your handling code here:
+        editProduct();
+        
+    }//GEN-LAST:event_btnProductEditMouseClicked
 
     /**
      * @param args the command line arguments
