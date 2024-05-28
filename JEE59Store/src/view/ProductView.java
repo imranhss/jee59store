@@ -4,6 +4,8 @@
  */
 package view;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +30,15 @@ public class ProductView extends javax.swing.JFrame {
         initComponents();
         showProductOnTable();
         showProductToCombo();
+
+        comProductName.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                getProductSalesPrice(e);
+            }
+
+        });
+
     }
 
     public void addProduct() {
@@ -213,6 +224,41 @@ public class ProductView extends javax.swing.JFrame {
 
     }
 
+    public void getProductSalesPrice(ItemEvent e) {
+
+        String selectedProductName = "";
+
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            selectedProductName = (String) e.getItem();
+            //TODO your actitons
+            extractSalesPrice(selectedProductName);
+        }
+
+    }
+
+    public void extractSalesPrice(String productName) {
+
+        String sql = "select salesPrice from product where name=?";
+        PreparedStatement ps;
+        ResultSet rs;
+
+        try {
+            ps = db.getCon().prepareStatement(sql);
+            ps.setString(1, productName);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String salesPrice = rs.getString("salesPrice");
+                txtSalesUnitPrice.setText(salesPrice);
+            }
+
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -262,7 +308,7 @@ public class ProductView extends javax.swing.JFrame {
         jLabel15 = new javax.swing.JLabel();
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jLabel14 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        txtSalesUnitPrice = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         jTextField3 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
@@ -538,6 +584,11 @@ public class ProductView extends javax.swing.JFrame {
         jLabel3.setText("Name");
 
         comProductName.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        comProductName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comProductNameActionPerformed(evt);
+            }
+        });
 
         jLabel13.setText("Quantity");
 
@@ -570,7 +621,7 @@ public class ProductView extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(salesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(comProductName, 0, 152, Short.MAX_VALUE)
-                            .addComponent(jTextField2)))
+                            .addComponent(txtSalesUnitPrice)))
                     .addGroup(salesLayout.createSequentialGroup()
                         .addGap(39, 39, 39)
                         .addComponent(jButton3)
@@ -612,7 +663,7 @@ public class ProductView extends javax.swing.JFrame {
                 .addGap(27, 27, 27)
                 .addGroup(salesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel14)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSalesUnitPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16)
                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(54, 54, 54)
@@ -678,14 +729,16 @@ public class ProductView extends javax.swing.JFrame {
         // TODO add your handling code here:
 
         mainView.setSelectedIndex(0);
-        
+
 
     }//GEN-LAST:event_btnAddProductMouseClicked
 
     private void btnSalesProductMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalesProductMouseClicked
         // TODO add your handling code here:
         mainView.setSelectedIndex(1);
+
         showProductToCombo();
+
 
     }//GEN-LAST:event_btnSalesProductMouseClicked
 
@@ -763,6 +816,12 @@ public class ProductView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnProductEditMouseClicked
 
+    private void comProductNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comProductNameActionPerformed
+        // TODO add your handling code here:
+
+
+    }//GEN-LAST:event_comProductNameActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -837,7 +896,6 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTabbedPane mainView;
     private javax.swing.JPanel report;
@@ -848,6 +906,7 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtQuantity;
     private javax.swing.JTextField txtSalesPrice;
+    private javax.swing.JTextField txtSalesUnitPrice;
     private javax.swing.JTextField txtTotalPrice;
     private javax.swing.JTextField txtUnitPrice;
     // End of variables declaration//GEN-END:variables
