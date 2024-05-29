@@ -36,7 +36,6 @@ public class ProductView extends javax.swing.JFrame {
         showProductOnTable();
         showProductToCombo();
         showStockOnTable();
-       
 
         comProductName.addItemListener(new ItemListener() {
             @Override
@@ -350,6 +349,32 @@ public class ProductView extends javax.swing.JFrame {
             //TODO your actitons
             extractSalesPrice(selectedProductName);
         }
+        
+        String sql="Select quantity from stock where name=?";
+        
+        try {
+            ps=db.getCon().prepareStatement(sql);
+            ps.setString(1, selectedProductName);
+            
+            rs=ps.executeQuery();
+            
+            while(rs.next()){
+                float quantity=rs.getFloat("quantity");
+                lblStock.setText(quantity+"");
+               
+            }
+            
+            ps.close();
+            db.getCon().close();
+            rs.close();
+            
+        } catch (ClassNotFoundException| SQLException ex) {
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+        
 
     }
 
@@ -413,6 +438,26 @@ public class ProductView extends javax.swing.JFrame {
         }
     }
 
+    public void stockUpdateOnSales() {
+        String sql = "update stock set quantity=quantity-? where name=?";
+
+        try {
+            ps = db.getCon().prepareStatement(sql);
+
+            ps.setFloat(1, Float.parseFloat(txtSalesQunatity.getText().trim()));
+            ps.setString(2, comProductName.getSelectedItem().toString());
+
+            ps.executeUpdate();
+
+            ps.close();
+            db.getCon().close();
+
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
     public void addSales() {
 
         Date date = convertUtilDateToSqlDate(salesDate.getDate());
@@ -435,7 +480,9 @@ public class ProductView extends javax.swing.JFrame {
             db.getCon().close();
 
             JOptionPane.showMessageDialog(this, "Add Sales Successfully");
-
+            stockUpdateOnSales();
+            showStockOnTable();
+            
         } catch (ClassNotFoundException | SQLException ex) {
             JOptionPane.showMessageDialog(this, "Add Sales Unsuccessfully");
             Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
@@ -499,6 +546,8 @@ public class ProductView extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         btnSalesSave = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jLabel18 = new javax.swing.JLabel();
+        lblStock = new javax.swing.JLabel();
         stock = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jLabel17 = new javax.swing.JLabel();
@@ -805,6 +854,8 @@ public class ProductView extends javax.swing.JFrame {
 
         jButton5.setText("Rest");
 
+        jLabel18.setText("Stock");
+
         javax.swing.GroupLayout salesLayout = new javax.swing.GroupLayout(sales);
         sales.setLayout(salesLayout);
         salesLayout.setHorizontalGroup(
@@ -837,9 +888,15 @@ public class ProductView extends javax.swing.JFrame {
                             .addComponent(txtSalesQunatity, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
                             .addComponent(txtSalesTotalPrice))
                         .addGap(42, 42, 42)
-                        .addComponent(jLabel15)
-                        .addGap(18, 18, 18)
-                        .addComponent(salesDate, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(salesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(salesLayout.createSequentialGroup()
+                                .addComponent(jLabel15)
+                                .addGap(18, 18, 18)
+                                .addComponent(salesDate, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(salesLayout.createSequentialGroup()
+                                .addComponent(jLabel18)
+                                .addGap(18, 18, 18)
+                                .addComponent(lblStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addGroup(salesLayout.createSequentialGroup()
                         .addComponent(jButton5)
                         .addGap(67, 67, 67)
@@ -864,7 +921,9 @@ public class ProductView extends javax.swing.JFrame {
                     .addComponent(jLabel14)
                     .addComponent(txtSalesUnitPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16)
-                    .addComponent(txtSalesTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtSalesTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel18)
+                    .addComponent(lblStock, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(54, 54, 54)
                 .addGroup(salesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -1110,6 +1169,7 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
@@ -1125,6 +1185,7 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblStock;
     private javax.swing.JTabbedPane mainView;
     private javax.swing.JPanel report;
     private javax.swing.JPanel sales;
