@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +29,9 @@ public class ProductView extends javax.swing.JFrame {
     PreparedStatement ps;
     ResultSet rs;
 
+    LocalDate currentDate = LocalDate.now();
+    java.sql.Date sqlCurrentDate = java.sql.Date.valueOf(currentDate);
+
     /**
      * Creates new form ProductView
      */
@@ -44,6 +48,200 @@ public class ProductView extends javax.swing.JFrame {
             }
 
         });
+
+    }
+
+    public void getSalesReport() {
+
+        String[] salesViewTableColumn = {"SL", "Name", "Unit Price", "Qunatity", "Total Price", "Date"};
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(salesViewTableColumn);
+        tblReports.setModel(model);
+
+        Date toDate = dateToReport.getDate();
+        Date fromDate = dateFromReport.getDate();
+
+        String sql = "select * from sales where salesDate between ? and ?";
+
+        String sql1 = "select sum(salesTotalPrice) from sales where salesDate between ? and ?";
+
+        try {
+            ps = db.getCon().prepareStatement(sql);
+
+            ps.setDate(1, convertUtilDateToSqlDate(fromDate));
+            ps.setDate(2, convertUtilDateToSqlDate(toDate));
+
+            rs = ps.executeQuery();
+
+            int sl = 1;
+
+            while (rs.next()) {
+
+                //int id = rs.getInt("id");
+                String name = rs.getString("name");
+                float unitPrice = rs.getFloat("salesUnitPrice");
+                float quantity = rs.getFloat("salesQuantity");
+                float totalPrice = rs.getFloat("salesTotalPrice");
+
+                Date salesDate = rs.getDate("salesDate");
+
+                model.addRow(new Object[]{sl, name, unitPrice, quantity, totalPrice, salesDate});
+
+                sl += 1;
+            }
+
+            ps.close();
+            rs.close();
+            db.getCon().close();
+
+            ps = db.getCon().prepareStatement(sql1);
+
+            ps.setDate(1, convertUtilDateToSqlDate(fromDate));
+            ps.setDate(2, convertUtilDateToSqlDate(toDate));
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                float totalPrice = rs.getFloat("sum(salesTotalPrice)");
+                System.out.println(totalPrice);
+                model.addRow(new Object[]{"", "", "", "Total Amount", totalPrice});
+            }
+
+            ps.close();
+            rs.close();
+            db.getCon().close();
+
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public void getGrossProfit() {
+        
+        Date toDate = dateToReport.getDate();
+        Date fromDate = dateFromReport.getDate();
+
+        String sql1 = "select sum(salesTotalPrice) from sales where salesDate between ? and ?";
+
+        String sql = "select sum(totalPrice) from product where purcahseDate between ? and ?";
+
+        try {
+            ps = db.getCon().prepareStatement(sql);
+
+            ps.setDate(1, convertUtilDateToSqlDate(fromDate));
+            ps.setDate(2, convertUtilDateToSqlDate(toDate));
+
+            rs = ps.executeQuery();
+
+            float totalPurchasePrice = 0;
+
+            while (rs.next()) {
+
+                //int id = rs.getInt("id");
+                totalPurchasePrice = rs.getFloat("sum(totalPrice)");
+
+            }
+
+            ps.close();
+            rs.close();
+            db.getCon().close();
+
+            
+            // For Sales 
+            
+            ps = db.getCon().prepareStatement(sql1);
+
+            ps.setDate(1, convertUtilDateToSqlDate(fromDate));
+            ps.setDate(2, convertUtilDateToSqlDate(toDate));
+
+            rs = ps.executeQuery();
+            float totalSalesPrice=0;
+            
+            while (rs.next()) {
+                
+                 totalSalesPrice = rs.getFloat("sum(salesTotalPrice)");
+               
+            }
+
+            ps.close();
+            rs.close();
+            db.getCon().close();
+            
+            float grossProfit= totalSalesPrice-totalPurchasePrice;
+            
+            lblProfit.setText("Profit: "+grossProfit);
+
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public void getPurchaseReport() {
+
+        String[] productViewTableColumn = {"SL", "Name", "Unit Price", "Qunatity", "Total Price", "Sales Price", "Date"};
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(productViewTableColumn);
+        tblReports.setModel(model);
+
+        Date toDate = dateToReport.getDate();
+        Date fromDate = dateFromReport.getDate();
+
+        String sql = "select * from product where purcahseDate between ? and ?";
+        try {
+            ps = db.getCon().prepareStatement(sql);
+            ps.setDate(1, convertUtilDateToSqlDate(fromDate));
+            ps.setDate(2, convertUtilDateToSqlDate(toDate));
+
+            rs = ps.executeQuery();
+
+            int sl = 1;
+
+            while (rs.next()) {
+
+                //int id = rs.getInt("id");
+                String name = rs.getString("name");
+                float unitPrice = rs.getFloat("unitPrice");
+                float quantity = rs.getFloat("quantity");
+                float totalPrice = rs.getFloat("totalPrice");
+                float salesPrice = rs.getFloat("salesPrice");
+                Date purcahseDate = rs.getDate("purcahseDate");
+
+                model.addRow(new Object[]{sl, name, unitPrice, quantity, totalPrice, salesPrice, purcahseDate});
+
+                sl += 1;
+            }
+
+            ps.close();
+            rs.close();
+            db.getCon().close();
+
+            String sql1 = "select sum(totalPrice) from product where purcahseDate between ? and ?";
+
+            ps = db.getCon().prepareStatement(sql1);
+
+            ps.setDate(1, convertUtilDateToSqlDate(fromDate));
+            ps.setDate(2, convertUtilDateToSqlDate(toDate));
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                //int id = rs.getInt("id");
+                float totalPrice = rs.getFloat("sum(totalPrice)");
+
+                model.addRow(new Object[]{"", "", "", "Total Amount", totalPrice});
+
+            }
+
+            ps.close();
+            rs.close();
+            db.getCon().close();
+
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
@@ -118,7 +316,7 @@ public class ProductView extends javax.swing.JFrame {
 
     public void addProduct() {
 
-        String sql = "insert into product(name,unitPrice,quantity,totalPrice, salesPrice) values (?,?,?,?,?)";
+        String sql = "insert into product(name,unitPrice,quantity,totalPrice, salesPrice,purcahseDate) values (?,?,?,?,?,?)";
         PreparedStatement ps;
 
         try {
@@ -129,6 +327,7 @@ public class ProductView extends javax.swing.JFrame {
             ps.setFloat(3, Float.parseFloat(txtQuantity.getText().trim()));
             ps.setFloat(4, Float.parseFloat(txtTotalPrice.getText().trim()));
             ps.setFloat(5, Float.parseFloat(txtSalesPrice.getText().trim()));
+            ps.setDate(6, sqlCurrentDate);
 
             ps.executeUpdate();
 
@@ -349,32 +548,28 @@ public class ProductView extends javax.swing.JFrame {
             //TODO your actitons
             extractSalesPrice(selectedProductName);
         }
-        
-        String sql="Select quantity from stock where name=?";
-        
+
+        String sql = "Select quantity from stock where name=?";
+
         try {
-            ps=db.getCon().prepareStatement(sql);
+            ps = db.getCon().prepareStatement(sql);
             ps.setString(1, selectedProductName);
-            
-            rs=ps.executeQuery();
-            
-            while(rs.next()){
-                float quantity=rs.getFloat("quantity");
-                lblStock.setText(quantity+"");
-               
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                float quantity = rs.getFloat("quantity");
+                lblStock.setText(quantity + "");
+
             }
-            
+
             ps.close();
             db.getCon().close();
             rs.close();
-            
-        } catch (ClassNotFoundException| SQLException ex) {
+
+        } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
-        
-        
 
     }
 
@@ -482,7 +677,7 @@ public class ProductView extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Add Sales Successfully");
             stockUpdateOnSales();
             showStockOnTable();
-            
+
         } catch (ClassNotFoundException | SQLException ex) {
             JOptionPane.showMessageDialog(this, "Add Sales Unsuccessfully");
             Logger.getLogger(ProductView.class.getName()).log(Level.SEVERE, null, ex);
@@ -554,7 +749,25 @@ public class ProductView extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
         report = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        dateFromReport = new com.toedter.calendar.JDateChooser();
         jLabel5 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        jDateChooser2 = new com.toedter.calendar.JDateChooser();
+        jLabel20 = new javax.swing.JLabel();
+        jDateChooser3 = new com.toedter.calendar.JDateChooser();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        dateToReport = new com.toedter.calendar.JDateChooser();
+        btnReportPurchase = new javax.swing.JButton();
+        btnReportSales = new javax.swing.JButton();
+        btnReportGrossProfit = new javax.swing.JButton();
+        btnReportReset = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tblReports = new javax.swing.JTable();
+        jPanel8 = new javax.swing.JPanel();
+        lblProfit = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -974,24 +1187,91 @@ public class ProductView extends javax.swing.JFrame {
 
         mainView.addTab("stock", stock);
 
-        jLabel5.setText("Report");
+        report.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        javax.swing.GroupLayout reportLayout = new javax.swing.GroupLayout(report);
-        report.setLayout(reportLayout);
-        reportLayout.setHorizontalGroup(
-            reportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(reportLayout.createSequentialGroup()
-                .addGap(327, 327, 327)
-                .addComponent(jLabel5)
-                .addContainerGap(438, Short.MAX_VALUE))
-        );
-        reportLayout.setVerticalGroup(
-            reportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(reportLayout.createSequentialGroup()
-                .addGap(203, 203, 203)
-                .addComponent(jLabel5)
-                .addContainerGap(286, Short.MAX_VALUE))
-        );
+        jPanel7.setBackground(new java.awt.Color(255, 102, 153));
+        jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Reports");
+        jPanel7.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 800, 70));
+
+        report.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 800, 70));
+        report.add(dateFromReport, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 100, 260, -1));
+
+        jLabel5.setText("From");
+        report.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, 40, 20));
+
+        jLabel19.setText("From");
+        report.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, 40, 20));
+        report.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 100, 170, -1));
+
+        jLabel20.setText("From");
+        report.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, 40, 20));
+        report.add(jDateChooser3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 100, 170, -1));
+
+        jLabel21.setText("From");
+        report.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, 40, 20));
+
+        jLabel22.setText("To");
+        report.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 100, 30, 20));
+        report.add(dateToReport, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 100, 260, -1));
+
+        btnReportPurchase.setText("Purchase");
+        btnReportPurchase.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnReportPurchaseMouseClicked(evt);
+            }
+        });
+        report.add(btnReportPurchase, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 160, -1, -1));
+
+        btnReportSales.setText("Sales");
+        btnReportSales.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnReportSalesMouseClicked(evt);
+            }
+        });
+        report.add(btnReportSales, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, -1, -1));
+
+        btnReportGrossProfit.setText("Gross Profit");
+        btnReportGrossProfit.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnReportGrossProfitMouseClicked(evt);
+            }
+        });
+        report.add(btnReportGrossProfit, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, -1, -1));
+
+        btnReportReset.setText("Reset");
+        report.add(btnReportReset, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 160, -1, -1));
+
+        tblReports.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane3.setViewportView(tblReports);
+
+        report.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 220, 800, 280));
+
+        jPanel8.setBackground(new java.awt.Color(255, 102, 153));
+        jPanel8.setForeground(new java.awt.Color(255, 102, 153));
+        jPanel8.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblProfit.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lblProfit.setForeground(new java.awt.Color(255, 255, 255));
+        lblProfit.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblProfit.setText("Profit : ");
+        jPanel8.add(lblProfit, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 260, 80));
+
+        report.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 260, 80));
 
         mainView.addTab("report", report);
 
@@ -1110,6 +1390,21 @@ public class ProductView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnSalesSaveMouseClicked
 
+    private void btnReportPurchaseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnReportPurchaseMouseClicked
+        // TODO add your handling code here:
+        getPurchaseReport();
+    }//GEN-LAST:event_btnReportPurchaseMouseClicked
+
+    private void btnReportSalesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnReportSalesMouseClicked
+        // TODO add your handling code here:
+        getSalesReport();
+    }//GEN-LAST:event_btnReportSalesMouseClicked
+
+    private void btnReportGrossProfitMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnReportGrossProfitMouseClicked
+        // TODO add your handling code here:
+        getGrossProfit();
+    }//GEN-LAST:event_btnReportGrossProfitMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -1152,14 +1447,22 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JButton btnProductDelete;
     private javax.swing.JButton btnProductEdit;
     private javax.swing.JButton btnProductReset;
+    private javax.swing.JButton btnReportGrossProfit;
+    private javax.swing.JButton btnReportPurchase;
+    private javax.swing.JButton btnReportReset;
+    private javax.swing.JButton btnReportSales;
     private javax.swing.JButton btnSalesProduct;
     private javax.swing.JButton btnSalesSave;
     private javax.swing.JButton btnStock;
     private javax.swing.JComboBox<String> comProductName;
+    private com.toedter.calendar.JDateChooser dateFromReport;
+    private com.toedter.calendar.JDateChooser dateToReport;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private com.toedter.calendar.JDateChooser jDateChooser2;
+    private com.toedter.calendar.JDateChooser jDateChooser3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1170,8 +1473,13 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -1183,8 +1491,12 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JLabel lblProfit;
     private javax.swing.JLabel lblStock;
     private javax.swing.JTabbedPane mainView;
     private javax.swing.JPanel report;
@@ -1192,6 +1504,7 @@ public class ProductView extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser salesDate;
     private javax.swing.JPanel stock;
     private javax.swing.JTable tblProductView;
+    private javax.swing.JTable tblReports;
     private javax.swing.JTable tblStock;
     private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtName;
