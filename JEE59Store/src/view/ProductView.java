@@ -28,6 +28,7 @@ public class ProductView extends javax.swing.JFrame {
     DbUtil db = new DbUtil();
     PreparedStatement ps;
     ResultSet rs;
+    public  static float stockQuantity=0;
 
     LocalDate currentDate = LocalDate.now();
     java.sql.Date sqlCurrentDate = java.sql.Date.valueOf(currentDate);
@@ -362,6 +363,7 @@ public class ProductView extends javax.swing.JFrame {
     }
 
     public void clear() {
+        btnProductAdd.setVisible(true);
         txtId.setText("");
         txtName.setText("");
         txtUnitPrice.setText("");
@@ -558,8 +560,8 @@ public class ProductView extends javax.swing.JFrame {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                float quantity = rs.getFloat("quantity");
-                lblStock.setText(quantity + "");
+                 stockQuantity = rs.getFloat("quantity");
+                lblStock.setText(stockQuantity + "");
 
             }
 
@@ -572,6 +574,23 @@ public class ProductView extends javax.swing.JFrame {
         }
 
     }
+    
+    
+    public void salesValidationforQuantity(){
+        float salesQuantity=  Float.parseFloat(txtSalesQunatity.getText().trim());
+        
+        if(salesQuantity>stockQuantity){
+            JOptionPane.showMessageDialog(this, "Sales quantity is more then Stock");
+            txtSalesQunatity.setText("0");
+            txtSalesQunatity.requestFocus();
+        }
+        else{
+        
+        }
+    
+    
+    }
+    
 
     public void extractSalesPrice(String productName) {
 
@@ -701,7 +720,7 @@ public class ProductView extends javax.swing.JFrame {
         btnAddProduct = new javax.swing.JButton();
         btnSalesProduct = new javax.swing.JButton();
         btnStock = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btnReports = new javax.swing.JButton();
         mainView = new javax.swing.JTabbedPane();
         add = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -818,10 +837,15 @@ public class ProductView extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setText("Report");
-        jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
+        btnReports.setText("Report");
+        btnReports.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton4MouseClicked(evt);
+                btnReportsMouseClicked(evt);
+            }
+        });
+        btnReports.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReportsActionPerformed(evt);
             }
         });
 
@@ -832,7 +856,7 @@ public class ProductView extends javax.swing.JFrame {
             .addComponent(btnAddProduct, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnSalesProduct, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
             .addComponent(btnStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnReports, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -844,7 +868,7 @@ public class ProductView extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(btnStock)
                 .addGap(18, 18, 18)
-                .addComponent(jButton4)
+                .addComponent(btnReports)
                 .addContainerGap(329, Short.MAX_VALUE))
         );
 
@@ -1052,7 +1076,11 @@ public class ProductView extends javax.swing.JFrame {
 
         jLabel14.setText("UnitPrice");
 
+        txtSalesUnitPrice.setEditable(false);
+
         jLabel16.setText("Total Price");
+
+        txtSalesTotalPrice.setEditable(false);
 
         jButton1.setText("Edit");
 
@@ -1244,6 +1272,11 @@ public class ProductView extends javax.swing.JFrame {
         report.add(btnReportGrossProfit, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, -1, -1));
 
         btnReportReset.setText("Reset");
+        btnReportReset.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnReportResetMouseClicked(evt);
+            }
+        });
         report.add(btnReportReset, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 160, -1, -1));
 
         tblReports.setModel(new javax.swing.table.DefaultTableModel(
@@ -1303,10 +1336,10 @@ public class ProductView extends javax.swing.JFrame {
         mainView.setSelectedIndex(2);
     }//GEN-LAST:event_btnStockMouseClicked
 
-    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
+    private void btnReportsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnReportsMouseClicked
         // TODO add your handling code here:
         mainView.setSelectedIndex(3);
-    }//GEN-LAST:event_jButton4MouseClicked
+    }//GEN-LAST:event_btnReportsMouseClicked
 
     private void txtTotalPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTotalPriceActionPerformed
         // TODO add your handling code here:
@@ -1357,6 +1390,8 @@ public class ProductView extends javax.swing.JFrame {
         txtQuantity.setText(quantity);
         txtTotalPrice.setText(totalPrice);
         txtSalesPrice.setText(salesPrice);
+        
+        btnProductAdd.setVisible(false);
 
     }//GEN-LAST:event_tblProductViewMouseClicked
 
@@ -1381,6 +1416,9 @@ public class ProductView extends javax.swing.JFrame {
     private void txtSalesQunatityFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSalesQunatityFocusLost
         // TODO add your handling code here:
         getTotalSalesPrice();
+        salesValidationforQuantity();  
+        
+        
 
     }//GEN-LAST:event_txtSalesQunatityFocusLost
 
@@ -1404,6 +1442,22 @@ public class ProductView extends javax.swing.JFrame {
         // TODO add your handling code here:
         getGrossProfit();
     }//GEN-LAST:event_btnReportGrossProfitMouseClicked
+
+    private void btnReportResetMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnReportResetMouseClicked
+        // TODO add your handling code here:
+        
+        DefaultTableModel model=new DefaultTableModel();
+        tblReports.setModel(model);
+        model.setRowCount(0);
+        
+    }//GEN-LAST:event_btnReportResetMouseClicked
+
+    private void btnReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel model=new DefaultTableModel();
+        tblReports.setModel(model);
+        model.setRowCount(0);
+    }//GEN-LAST:event_btnReportsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1451,6 +1505,7 @@ public class ProductView extends javax.swing.JFrame {
     private javax.swing.JButton btnReportPurchase;
     private javax.swing.JButton btnReportReset;
     private javax.swing.JButton btnReportSales;
+    private javax.swing.JButton btnReports;
     private javax.swing.JButton btnSalesProduct;
     private javax.swing.JButton btnSalesSave;
     private javax.swing.JButton btnStock;
@@ -1459,7 +1514,6 @@ public class ProductView extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser dateToReport;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private com.toedter.calendar.JDateChooser jDateChooser3;
